@@ -1,1 +1,42 @@
+#!/bin/bash
 
+# Set environment variables
+export DISPLAY=:99
+export SCREEN_SIZE=1024x768x24
+export VNC_PORT=5900
+export NOVNC_PORT=6080
+export JUPYTER_PORT=8080
+
+# Create virtual display with Xvfb
+Xvfb :99 -screen 0 $SCREEN_SIZE > /dev/null 2>&1 &
+
+# Wait for Xvfb to start
+sleep 2
+
+# Start fluxbox window manager in background
+fluxbox > /dev/null 2>&1 &
+
+# Start VNC server
+x11vnc -display :99 -forever -shared -nopw -listen localhost -xkb -bg -rfbport $VNC_PORT > /dev/null 2>&1
+
+# Start noVNC web server
+/opt/novnc/utils/novnc_proxy --vnc localhost:$VNC_PORT --listen $NOVNC_PORT > /dev/null 2>&1 &
+
+# Start Jupyter Notebook/Lab
+jupyter notebook --no-browser --port=$JUPYTER_PORT --ip=0.0.0.0 --NotebookApp.token='' --NotebookApp.password='' --allow-root &
+
+# Keep container running
+echo "========================================="
+echo "Remote Desktop Environment is Ready!"
+echo "========================================="
+echo ""
+echo "Access options:"
+echo "1. Jupyter Lab: https://hub.gke2.mybinder.org/user/YOUR-REPO-PATH/lab"
+echo "2. Remote Desktop (noVNC): Add ?port=6080 to your Binder URL"
+echo "3. Direct VNC: localhost:5900 (within container)"
+echo ""
+echo "To test display, run: xterm &"
+echo "========================================="
+
+# Monitor processes and keep container alive
+wait
