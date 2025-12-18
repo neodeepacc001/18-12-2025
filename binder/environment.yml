@@ -1,1 +1,15 @@
-
+name: remote-desktop
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.9
+  - pip
+  - numpy
+  - matplotlib
+  - pillow
+  - pip:
+    - pyvirtualdisplay
+    - selenium
+    - jupyterlab
+    - notebook
